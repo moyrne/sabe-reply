@@ -1,0 +1,25 @@
+syntax = "v1"
+
+info(
+	title: "sabe-reply"
+	desc: "ShaBi回复"
+	author: "moyrn"
+	email: "moyrn@qq.com"
+)
+
+type sabeReplyRequest {
+	Kind       string `json:"kind"`
+	Sender     string `json:"sender"`
+	Receiver   string `json:"receiver"`
+	Content    string `json:"content"`
+	RawContent string `json:"raw_content"`
+}
+
+type sabeReplyResponse {
+	Reply string `json:"reply"`
+}
+
+service sabe-reply-api {
+	@handler SabeReply
+	post /api/reply (sabeReplyRequest) returns (sabeReplyResponse)
+}

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package sabeagent;
+
+option go_package = "./sabeagent";
+
+message sabeReplyRequest{
+  repeated string context = 1;
+  string sender = 2;
+  string content = 3;
+}
+
+message sabeReplyResponse{
+  string reply = 1;
+}
+
+service SabeAgent{
+  rpc sabeReply(sabeReplyRequest) returns(sabeReplyResponse);
+}
+
