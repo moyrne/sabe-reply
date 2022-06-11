@@ -4,6 +4,7 @@ CREATE TABLE `chat_record`
     `created_at`  datetime    not null,
 
     `kind`        varchar(20) not null comment '{"personal":"个人","group":"群聊"}',
+    `group`       varchar(50) not null comment '群聊',
 
     `sender`      varchar(50) not null,
     `receiver`    varchar(50) not null,

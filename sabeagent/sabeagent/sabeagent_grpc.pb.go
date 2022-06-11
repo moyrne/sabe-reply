@@ -35,7 +35,7 @@ func NewSabeAgentClient(cc grpc.ClientConnInterface) SabeAgentClient {
 
 func (c *sabeAgentClient) SabeReply(ctx context.Context, in *SabeReplyRequest, opts ...grpc.CallOption) (*SabeReplyResponse, error) {
 	out := new(SabeReplyResponse)
-	err := c.cc.Invoke(ctx, "/sabeagent.SabeAgent/sabeReply", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/sabeagent.SabeAgent/SabeReply", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func _SabeAgent_SabeReply_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sabeagent.SabeAgent/sabeReply",
+		FullMethod: "/sabeagent.SabeAgent/SabeReply",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SabeAgentServer).SabeReply(ctx, req.(*SabeReplyRequest))
@@ -96,7 +96,7 @@ var SabeAgent_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SabeAgentServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "sabeReply",
+			MethodName: "SabeReply",
 			Handler:    _SabeAgent_SabeReply_Handler,
 		},
 	},

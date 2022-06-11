@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/moyrne/sabe-reply/api-service/internal/config"
 	"github.com/moyrne/sabe-reply/api-service/internal/handler"
 	"github.com/moyrne/sabe-reply/api-service/internal/svc"
-
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
 )

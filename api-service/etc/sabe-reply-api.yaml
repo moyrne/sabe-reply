@@ -1,3 +1,13 @@
 Name: sabe-reply-api
 Host: 0.0.0.0
 Port: 8888
+SabeAgent:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: sabeagent.rpc
+# mysql链接地址，满足 $user:$password@tcp($ip:$port)/$db?$queries 格式即可
+DataSource: root:@tcp(localhost:3306)/sabe-reply
+Table: sabe-reply
+Cache:
+  - Host: localhost:6379

@@ -27,7 +27,6 @@ func NewSabeReplyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SabeRep
 }
 
 func (l *SabeReplyLogic) SabeReply(req *types.SabeReplyRequest) (resp *types.SabeReplyResponse, err error) {
-	// todo: add your logic here and delete this line
 	if _, err := l.svcCtx.Model.Insert(l.ctx, &model.ChatRecord{
 		CreatedAt:  time.Now(),
 		Kind:       req.Kind,
@@ -39,8 +38,9 @@ func (l *SabeReplyLogic) SabeReply(req *types.SabeReplyRequest) (resp *types.Sab
 		l.Logger.Error("insert chat record failed", "err", err)
 	}
 
+	// TODO 记录最近的聊天记录
+
 	reply, err := l.svcCtx.SabeAgent.SabeReply(l.ctx, &sabeagent.SabeReplyRequest{
-		Context: []string{},
 		Sender:  req.Sender,
 		Content: req.Content,
 	})

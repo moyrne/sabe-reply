@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/moyrne/sabe-reply/sabeagent/internal/svc"
+	"github.com/moyrne/sabe-reply/sabeagent/pkg/goreply"
 	"github.com/moyrne/sabe-reply/sabeagent/sabeagent"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -24,7 +25,13 @@ func NewSabeReplyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SabeRep
 }
 
 func (l *SabeReplyLogic) SabeReply(in *sabeagent.SabeReplyRequest) (*sabeagent.SabeReplyResponse, error) {
-	// todo: add your logic here and delete this line
-
-	return &sabeagent.SabeReplyResponse{}, nil
+	// TODO 后续可能使用 python+nlp
+	reply, err := goreply.Reply(goreply.Params{
+		Sender:  in.Sender,
+		Message: in.Content,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &sabeagent.SabeReplyResponse{Reply: reply}, nil
 }

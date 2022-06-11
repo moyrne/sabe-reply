@@ -19,8 +19,8 @@ import (
 var (
 	chatRecordFieldNames          = builder.RawFieldNames(&ChatRecord{})
 	chatRecordRows                = strings.Join(chatRecordFieldNames, ",")
-	chatRecordRowsExpectAutoSet   = strings.Join(stringx.Remove(chatRecordFieldNames, "`id`", "`create_time`", "`update_time`"), ",")
-	chatRecordRowsWithPlaceHolder = strings.Join(stringx.Remove(chatRecordFieldNames, "`id`", "`create_time`", "`update_time`"), "=?,") + "=?"
+	chatRecordRowsExpectAutoSet   = strings.Join(stringx.Remove(chatRecordFieldNames, "`id`", "`create_time`", "`update_time`", "`create_at`", "`update_at`"), ",")
+	chatRecordRowsWithPlaceHolder = strings.Join(stringx.Remove(chatRecordFieldNames, "`id`", "`create_time`", "`update_time`", "`create_at`", "`update_at`"), "=?,") + "=?"
 
 	cacheChatRecordIdPrefix = "cache:chatRecord:id:"
 )
@@ -29,7 +29,7 @@ type (
 	chatRecordModel interface {
 		Insert(ctx context.Context, data *ChatRecord) (sql.Result, error)
 		FindOne(ctx context.Context, id int64) (*ChatRecord, error)
-		Update(ctx context.Context, data *ChatRecord) error
+		Update(ctx context.Context, newData *ChatRecord) error
 		Delete(ctx context.Context, id int64) error
 	}
 
@@ -41,7 +41,8 @@ type (
 	ChatRecord struct {
 		Id         int64     `db:"id"`
 		CreatedAt  time.Time `db:"created_at"`
-		Kind       string    `db:"kind"` // {"personal":"个人","group":"群聊"}
+		Kind       string    `db:"kind"`  // {"personal":"个人","group":"群聊"}
+		Group      string    `db:"group"` // 群聊
 		Sender     string    `db:"sender"`
 		Receiver   string    `db:"receiver"`
 		Content    string    `db:"content"`
@@ -56,13 +57,13 @@ func newChatRecordModel(conn sqlx.SqlConn, c cache.CacheConf) *defaultChatRecord
 	}
 }
 
-func (m *defaultChatRecordModel) Insert(ctx context.Context, data *ChatRecord) (sql.Result, error) {
-	chatRecordIdKey := fmt.Sprintf("%s%v", cacheChatRecordIdPrefix, data.Id)
-	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?)", m.table, chatRecordRowsExpectAutoSet)
-		return conn.ExecCtx(ctx, query, data.CreatedAt, data.Kind, data.Sender, data.Receiver, data.Content, data.RawContent)
+func (m *defaultChatRecordModel) Delete(ctx context.Context, id int64) error {
+	chatRecordIdKey := fmt.Sprintf("%s%v", cacheChatRecordIdPrefix, id)
+	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
+		return conn.ExecCtx(ctx, query, id)
 	}, chatRecordIdKey)
-	return ret, err
+	return err
 }
 
 func (m *defaultChatRecordModel) FindOne(ctx context.Context, id int64) (*ChatRecord, error) {
@@ -82,20 +83,20 @@ func (m *defaultChatRecordModel) FindOne(ctx context.Context, id int64) (*ChatRe
 	}
 }
 
+func (m *defaultChatRecordModel) Insert(ctx context.Context, data *ChatRecord) (sql.Result, error) {
+	chatRecordIdKey := fmt.Sprintf("%s%v", cacheChatRecordIdPrefix, data.Id)
+	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?)", m.table, chatRecordRowsExpectAutoSet)
+		return conn.ExecCtx(ctx, query, data.CreatedAt, data.Kind, data.Group, data.Sender, data.Receiver, data.Content, data.RawContent)
+	}, chatRecordIdKey)
+	return ret, err
+}
+
 func (m *defaultChatRecordModel) Update(ctx context.Context, data *ChatRecord) error {
 	chatRecordIdKey := fmt.Sprintf("%s%v", cacheChatRecordIdPrefix, data.Id)
 	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, chatRecordRowsWithPlaceHolder)
-		return conn.ExecCtx(ctx, query, data.CreatedAt, data.Kind, data.Sender, data.Receiver, data.Content, data.RawContent, data.Id)
-	}, chatRecordIdKey)
-	return err
-}
-
-func (m *defaultChatRecordModel) Delete(ctx context.Context, id int64) error {
-	chatRecordIdKey := fmt.Sprintf("%s%v", cacheChatRecordIdPrefix, id)
-	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
-		return conn.ExecCtx(ctx, query, id)
+		return conn.ExecCtx(ctx, query, data.CreatedAt, data.Kind, data.Group, data.Sender, data.Receiver, data.Content, data.RawContent, data.Id)
 	}, chatRecordIdKey)
 	return err
 }
